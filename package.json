@@ -5,13 +5,15 @@
   "author": "davidgoli <davigoli@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack-dev-server"
   },
   "dependencies": {
     "babel-cli": "^6.24.1",
     "babel-env": "^2.4.1",
     "babel-loader": "^7.1.1",
     "lodash": "^4.17.4",
-    "webpack": "^3.1.0"
+    "webpack": "^3.1.0",
+    "webpack-dev-server": "^2.5.1"
   }
 }
