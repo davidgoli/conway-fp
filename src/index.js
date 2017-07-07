@@ -1,22 +1,23 @@
 import fp from 'lodash/fp'
+import each from 'lodash/each'
+import setup, { updateCell } from './setup'
 
-const createElement = (type) => document.createElement(type)
-const appendNew = (parent, type) => parent.appendChild(createElement(type))
-
-const parent = fp.memoize(() => document.getElementById('parent'))
-
-const initialState = []
 const rows = 32
 const cols = 32
 
-const setup = (parent) => fp.times(() => {
-  const row = appendNew(parent, 'tr')
-  fp.times(() => appendNew(row, 'td'), cols)
-}, rows)
+const updateState = (val) => fp.times(r => fp.times(val(r), cols), rows)
+const gameBoardEl = fp.memoize(() => document.getElementById('game'))
 
-const step = (state) => {
+const board = setup(gameBoardEl(), rows, cols)
 
+const randomize = () => updateState(r => c => !!fp.random(0, 1))
+
+let state = randomize()
+
+const render = (board, state) => {
+  each(state, (row, r) => {
+    each(row, (v, c) => updateCell(board, r, c, v))
+  })
 }
 
-setup(parent())
-step(initialState)
+render(board, state)
