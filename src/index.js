@@ -14,23 +14,33 @@ const randomize = () => updateState(r => c => !!fp.random(0, 1))
 let initialState = randomize()
 
 const add = (a, b) => a + b
+const sub = s => m => m - s
 
-const getCellValue = (previousState, r, c) => {
+const sum = fp.reduce(add, 0)
+
+const findNeighbors = (r, c) => fp.flow(
+    fp.slice(r-1, r+2),
+    fp.flatMap(fp.slice(c-1, c+2))
+  )
+
+const getCellValue = fp.curry((previousState, r, c) => {
   const previousValue = previousState[r][c]
-  const neighborRows = fp.slice(r-1, r+2)(previousState)
-  const neighbors = fp.flatMap(fp.slice(c-1, c+2))(neighborRows)
-  const neighborTotal = fp.reduce(add, 0)(neighbors) - previousValue
-  return previousValue ? fp.inRange(2, 4)(neighborTotal) : neighborTotal === 3
-}
 
-const nextState = (previousState) => updateState(r => c => getCellValue(previousState, r, c))
+  const neighborTotal = fp.flow(
+    findNeighbors(r, c),
+    sum,
+    sub(previousValue)
+  )(previousState)
+
+  return previousValue ? fp.inRange(2, 4)(neighborTotal) : neighborTotal === 3
+})
+
+const nextState = (previousState) => updateState(getCellValue(previousState))
 
 const run = (previousState) => () => {
+  render(board, previousState)
   const newState = nextState(previousState)
-  render(board, newState)
   setTimeout(run(newState), 20)
 }
-
-render(board, initialState)
 
 run(initialState)()
