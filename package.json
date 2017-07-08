@@ -13,7 +13,6 @@
     "babel-env": "^2.4.1",
     "babel-loader": "^7.1.1",
     "lodash": "^4.17.4",
-    "updeep": "^1.0.0",
     "webpack": "^3.1.0",
     "webpack-dev-server": "^2.5.1"
   }
