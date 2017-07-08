@@ -13,12 +13,12 @@ const updateCell = (board, r, c, v) => {
   board.children[0].children[r].children[c].className = v ? 'on' : ''
 }
 
-export const render = (board, state) => {
+export const render = fp.curry((board, state) => {
   each(state, (row, r) => {
     each(row, (v, c) => updateCell(board, r, c, v))
   })
   return state
-}
+})
 
 export default (parent, rows, cols) => createAndAppendTo(parent, [
     'tbody',
