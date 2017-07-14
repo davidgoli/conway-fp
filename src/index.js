@@ -1,5 +1,6 @@
 import fp from 'lodash/fp'
-import setup, { render } from './setup'
+import setup from './setup'
+import render from './render'
 
 const rows = 64
 const cols = 64
