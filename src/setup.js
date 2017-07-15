@@ -9,8 +9,10 @@ const createElement = (type) => document.createElement(type)
 
 const appendChild = curry((el, child) => tap(() => el.appendChild(child), el))
 
+const appendChildren = (el) => map(appendChild(el))
+
 const createElements = curry((type, children) => tap(el =>
-  map(appendChild(el))(children)
+  appendChildren(el)(children)
 )(createElement(type)))
 
 const tbody = createElements('tbody')

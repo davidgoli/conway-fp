@@ -47,7 +47,7 @@ const schedule = (newState) => setTimeout(() => run(newState), 0)
 const board = setup(gameBoardEl(), rows, cols)
 
 const run = flow(
-  render(board),
+  render(board, cols),
   nextState,
   schedule
 )

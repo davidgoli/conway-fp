@@ -26,8 +26,4 @@ module.exports = {
       },
     ],
   },
-
-  plugins: [
-    new LodashModuleReplacementPlugin(),
-  ],
 }
