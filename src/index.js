@@ -12,9 +12,10 @@ import {
 } from 'lodash/fp'
 import setup from './setup'
 import render from './render'
+import wrapslice from './wrapslice'
 
-const rows = 64
-const cols = 64
+const rows = 32
+const cols = 32
 
 const updateState = (getVal) => times(r => times(getVal(r), cols), rows)
 const gameBoardEl = memoize(() => document.getElementById('game'))
@@ -24,8 +25,8 @@ const randomize = () => updateState(r => c => !!random(0, 1))
 const subtract = curry((s, m) => m - s)
 
 const findNeighbors = (r, c) => flow(
-    slice(r-1, r+2),
-    flatMap(slice(c-1, c+2))
+    wrapslice(r-1, r+2),
+    flatMap(wrapslice(c-1, c+2))
   )
 
 const getCellValue = curry((previousState, r, c) => {
