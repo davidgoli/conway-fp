@@ -6,44 +6,45 @@ import {
   inRange,
   memoize,
   random,
-  slice,
   sum,
   times,
 } from 'lodash/fp'
 import setup from './setup'
 import render from './render'
-import wrapslice from './wrapslice'
 
-const rows = 32
-const cols = 32
+const rows = 128
+const cols = 128
+
+const wrap = (a, idx) => idx < 0 ? a[a.length + idx] : (idx >= a.length ? a[idx - a.length] : a[idx])
+
+const get = (a, r, c) => wrap(wrap(a, r), c)
+
+const neighborTotal = (a, r, c) =>
+  get(a, r-1, c-1) +
+    get(a, r, c-1) +
+    get(a, r+1, c-1) +
+    get(a, r-1, c) +
+    get(a, r+1, c) +
+    get(a, r-1, c+1) +
+    get(a, r, c+1) +
+    get(a, r+1, c+1)
 
 const updateState = (getVal) => times(r => times(getVal(r), cols), rows)
 const gameBoardEl = memoize(() => document.getElementById('game'))
 
 const randomize = () => updateState(r => c => !!random(0, 1))
 
-const subtract = curry((s, m) => m - s)
-
-const findNeighbors = (r, c) => flow(
-    wrapslice(r-1, r+2),
-    flatMap(wrapslice(c-1, c+2))
-  )
-
 const getCellValue = curry((previousState, r, c) => {
   const previousValue = previousState[r][c]
 
-  const neighborTotal = flow(
-    findNeighbors(r, c),
-    sum,
-    subtract(previousValue)
-  )(previousState)
+  const total = neighborTotal(previousState, r, c)
 
-  return previousValue ? inRange(2, 4)(neighborTotal) : neighborTotal === 3
+  return previousValue ? inRange(2, 4)(total) : total === 3
 })
 
 const nextState = compose(updateState, getCellValue)
 
-const schedule = (newState) => setTimeout(() => run(newState), 0)
+const schedule = (newState) => setTimeout(() => run(newState), 30)
 
 const board = setup(gameBoardEl(), rows, cols)
 
