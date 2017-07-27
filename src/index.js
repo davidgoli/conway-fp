@@ -12,6 +12,7 @@ import {
 } from 'lodash/fp'
 import setup from './setup'
 import render from './render'
+import subscribe from './events'
 
 const rows = 128
 const cols = 128
@@ -48,6 +49,10 @@ const schedule = newState => setTimeout(() => run(newState), 30)
 
 const gameBoardEl = memoize(() => document.getElementById('game'))
 const board = setup(gameBoardEl(), rows, cols)
+
+subscribe(({ r, c }) => {
+  console.log('clicked', r, c)
+})
 
 const run = flow(
   render(board, cols),
