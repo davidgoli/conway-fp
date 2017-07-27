@@ -1,6 +1,6 @@
+import Rx from 'rxjs'
 import { each, indexOf } from 'lodash'
-
-const addEvents = (el, events) => each(events, (handler, event) => el.addEventListener(event, handler))
+import { property } from 'lodash/fp'
 
 const findCoords = el => {
   const parentRow = el.parentNode
@@ -10,30 +10,22 @@ const findCoords = el => {
   return { r, c }
 }
 
+const isTd = e => e.target.tagName.toLowerCase() === 'td'
+
 export default listener => {
-  let mouseDown = false
-  const elClicked = (e) => {
-    const { target } = e
-    if (e.target.nodeName.toLowerCase() != 'td') return
+  const mousedown = Rx.Observable.fromEvent(document, 'mousedown')
+  const mousemove = Rx.Observable.fromEvent(document, 'mousemove')
+  const mouseup = Rx.Observable.fromEvent(document, 'mouseup')
+  const click = Rx.Observable.fromEvent(document, 'click')
 
-    listener(findCoords(target))
-  }
+  const drag = mousedown.flatMap(() =>
+    mousemove.takeUntil(mouseup)
+  )
 
-  addEvents(document.body, {
-    click: elClicked,
-
-    mousedown(e) {
-      mouseDown = true
-    },
-
-    mouseup(e) {
-      mouseDown = false
-    },
-
-    mousemove(e) {
-      if (mouseDown) {
-        elClicked(e)
-      }
-    },
+  drag.filter(isTd)
+      .map(property('target'))
+      .map(findCoords)
+      .subscribe((pos) => {
+    console.log('pos', pos)
   })
 }

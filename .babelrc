@@ -1,11 +1,13 @@
 {
   "presets": [
     "env",
+    "react",
     "stage-0"
   ],
   "plugins": [
-    "lodash",
     "transform-class-properties",
-    "transform-decorators"
+    "transform-decorators",
+    "transform-react-constant-elements",
+    "transform-react-inline-elements"
   ]
 }
