@@ -10,12 +10,13 @@ import {
   sum,
   times,
 } from 'lodash/fp'
+import Rx from 'rxjs'
 import setup from './setup'
 import render from './render'
-import subscribe from './events'
+import drag from './drag'
 
-const rows = 128
-const cols = 128
+const rows = 64
+const cols = 64
 
 const wrappedIndex = (length, idx) => idx < 0 ? length + idx : (idx >= length ? idx - length : idx)
 const wrappedGet = (a, idx) => a[wrappedIndex(a.length, idx)]
@@ -43,23 +44,23 @@ const updateState = getVal => times(r => times(getVal(r), cols), rows)
 
 const randomize = () => updateState(r => c => !!random(0, 1))
 
-const nextState = compose(updateState, getCellValue)
+const nextState = (state) =>
+  compose(updateState, getCellValue)(state)
 
-const schedule = newState => setTimeout(() => run(newState), 30)
+const board = setup(document.getElementById('game'), rows, cols)
 
-const gameBoardEl = memoize(() => document.getElementById('game'))
-const board = setup(gameBoardEl(), rows, cols)
+let lastClick = undefined
 
-subscribe(({ r, c }) => {
-  console.log('clicked', r, c)
-})
+Rx.Observable
+  .interval(30)
+  .scan(nextState, randomize())
+  .withLatestFrom(drag(), (state, event) => {
+    if (event && event !== lastClick) {
+      state[event.c][event.r] = !state[event.c][event.r]
+      lastClick = event
+    }
 
-const run = flow(
-  render(board, cols),
-  nextState,
-  schedule
-)
+    return state
+  })
+  .subscribe(render(board, cols))
 
-const initialState = randomize()
-
-run(initialState)
