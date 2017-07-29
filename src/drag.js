@@ -4,8 +4,8 @@ import { each, indexOf } from 'lodash'
 const findCoords = el => {
   const parentRow = el.parentNode
   const parentBody = el.parentNode.parentNode
-  const c = indexOf(parentRow.children, el)
-  const r = indexOf(parentBody.children, parentRow)
+  const r = indexOf(parentRow.children, el)
+  const c = indexOf(parentBody.children, parentRow)
   return { r, c }
 }
 
@@ -27,4 +27,5 @@ export default () => {
       .pluck('target')
       .filter(isTd)
       .map(findCoords)
+      .map(v => ({ value: v, type: 'click' }))
 }

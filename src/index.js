@@ -14,14 +14,10 @@ import Rx from 'rxjs'
 import setup from './setup'
 import render from './render'
 import drag from './drag'
+import get from './get'
 
 const rows = 64
 const cols = 64
-
-const wrappedIndex = (length, idx) => idx < 0 ? length + idx : (idx >= length ? idx - length : idx)
-const wrappedGet = (a, idx) => a[wrappedIndex(a.length, idx)]
-
-const get = (a, r, c) => wrappedGet(wrappedGet(a, r), c)
 
 const neighborTotal = (a, r, c) =>
   get(a, r-1, c-1) + get(a, r, c-1) + get(a, r+1, c-1) +
@@ -48,19 +44,25 @@ const nextState = (state) =>
   compose(updateState, getCellValue)(state)
 
 const board = setup(document.getElementById('game'), rows, cols)
+const dragStream = drag()
 
-let lastClick = undefined
+const cellForClick = (r, c, event) => r === event.r && c === event.c
 
-Rx.Observable
+const clickOn = (state, event) =>
+  updateState(r => c => cellForClick(r, c, event) ^ state[r][c])
+
+const ticker = Rx.Observable
   .interval(30)
-  .scan(nextState, randomize())
-  .withLatestFrom(drag(), (state, event) => {
-    if (event && event !== lastClick) {
-      state[event.c][event.r] = !state[event.c][event.r]
-      lastClick = event
+  .mapTo({ type: 'tick' })
+
+dragStream
+  .merge(ticker)
+  .scan((previousState, event) => {
+    switch (event.type) {
+      case 'tick':
+        return nextState(previousState)
+      case 'click':
+        return clickOn(previousState, event.value)
     }
-
-    return state
-  })
+  }, randomize())
   .subscribe(render(board, cols))
-
