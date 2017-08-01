@@ -1,15 +1,16 @@
 import {
   compose,
-  curry,
   eq,
   flatMap,
   flow,
   inRange,
   memoize,
   random,
+  rearg,
   sum,
   times,
 } from 'lodash/fp'
+import { curry, over, spread } from 'lodash'
 import Rx from 'rxjs'
 import setup from './setup'
 import render from './render'
@@ -21,29 +22,25 @@ const cols = 64
 
 const neighborTotal = (a, r, c) =>
   get(a, r-1, c-1) + get(a, r, c-1) + get(a, r+1, c-1) +
-    get(a, r-1, c) + get(a, r+1, c) +
+    get(a, r-1, c) + /* skip 0,0 */ get(a, r+1, c) +
     get(a, r-1, c+1) + get(a, r, c+1) + get(a, r+1, c+1)
 
 const livingCellNextValue = inRange(2, 4)
 const deadCellNextValue = eq(3)
-const nextCellValue = wasAlive => wasAlive ? livingCellNextValue : deadCellNextValue
 
-const getCellValue = curry((previousState, r, c) => {
-  const wasAlive = get(previousState, r, c)
-
-  const total = neighborTotal(previousState, r, c)
-
-  return nextCellValue(wasAlive)(total)
-})
+const nextCellValue = (wasAlive, total) => (wasAlive ? livingCellNextValue : deadCellNextValue)(total)
+const cellState = over([ get, neighborTotal ])
+const getCellValue = curry((previousState, r, c) => nextCellValue(...cellState(previousState, r, c)))
 
 const updateState = getVal => times(r => times(getVal(r), cols), rows)
 
 const randomize = () => updateState(r => c => !!random(0, 1))
 
-const nextState = (state) =>
-  compose(updateState, getCellValue)(state)
+const firstArg = rearg(0)
 
-const board = setup(document.getElementById('game'), rows, cols)
+const nextState =
+  firstArg(compose(updateState, getCellValue))
+
 const dragStream = drag()
 
 const cellForClick = (r, c, event) => r === event.r && c === event.c
@@ -54,6 +51,8 @@ const clickOn = (state, event) =>
 const ticker = Rx.Observable
   .interval(30)
   .mapTo({ type: 'tick' })
+
+const board = setup(document.getElementById('game'), rows, cols)
 
 dragStream
   .merge(ticker)
