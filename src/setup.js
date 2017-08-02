@@ -4,6 +4,7 @@ import {
   tap,
   times,
 } from 'lodash/fp'
+import render from './render'
 
 const createElement = type => document.createElement(type)
 
@@ -25,4 +26,4 @@ const table = (rows, cols) => tbody(
   ), rows)
 )
 
-export default (parent, rows, cols) => appendChild(parent, table(rows, cols))
+export default (parent, rows, cols) => render(appendChild(parent, table(rows, cols)), cols)
