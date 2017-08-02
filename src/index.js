@@ -5,7 +5,7 @@ import {
   random,
   times,
 } from 'lodash/fp'
-import { curry, over, spread } from 'lodash'
+import { curry, over } from 'lodash'
 import Rx from 'rxjs'
 import setupRenderer from './setup'
 import dragStream from './drag'
@@ -48,17 +48,20 @@ const neighborTotal = (a, r, c) =>
 const livingCellNextValue = inRange(2, 4)
 const deadCellNextValue = eq(3)
 
-const nextCellState = (wasAlive, total) =>
-  (wasAlive ? livingCellNextValue : deadCellNextValue)(total)
 const previousCellState = over([ get, neighborTotal ])
-const getNextCellState = curry((previousBoardState, r, c) => nextCellState(...previousCellState(previousBoardState, r, c)))
+const nextCellState = ([ wasAlive, totalNeighbors ]) =>
+  (wasAlive ? livingCellNextValue : deadCellNextValue)(totalNeighbors)
+const getNextCellState = compose(
+  nextCellState,
+  previousCellState
+)
 
 const updateState = getVal => times(r => times(getVal(r), cols), rows)
 
 const randomizeState = () => updateState(r => c => !!random(0, 1))
 
 const nextState =
-  compose(updateState, getNextCellState)
+  compose(updateState, curry(getNextCellState, get.length))
 
 const eventCoordinatesReached = (r, c, event) => r === event.r && c === event.c
 
