@@ -1,13 +1,8 @@
 import {
   compose,
   eq,
-  flatMap,
-  flow,
   inRange,
-  memoize,
   random,
-  rearg,
-  sum,
   times,
 } from 'lodash/fp'
 import { curry, over, spread } from 'lodash'
@@ -53,18 +48,17 @@ const neighborTotal = (a, r, c) =>
 const livingCellNextValue = inRange(2, 4)
 const deadCellNextValue = eq(3)
 
-const nextCellValue = (wasAlive, total) => (wasAlive ? livingCellNextValue : deadCellNextValue)(total)
-const cellState = over([ get, neighborTotal ])
-const getCellValue = curry((previousState, r, c) => nextCellValue(...cellState(previousState, r, c)))
+const nextCellState = (wasAlive, total) =>
+  (wasAlive ? livingCellNextValue : deadCellNextValue)(total)
+const previousCellState = over([ get, neighborTotal ])
+const getNextCellState = curry((previousBoardState, r, c) => nextCellState(...previousCellState(previousBoardState, r, c)))
 
 const updateState = getVal => times(r => times(getVal(r), cols), rows)
 
 const randomizeState = () => updateState(r => c => !!random(0, 1))
 
-const firstArg = rearg(0)
-
 const nextState =
-  firstArg(compose(updateState, getCellValue))
+  compose(updateState, getNextCellState)
 
 const eventCoordinatesReached = (r, c, event) => r === event.r && c === event.c
 
@@ -79,12 +73,12 @@ const render = setupRenderer(document.getElementById('game'), rows, cols)
 
 dragStream()
   .merge(ticker)
-  .scan((previousState, event) => {
+  .scan((previousBoardState, event) => {
     switch (event.type) {
       case 'tick':
-        return nextState(previousState)
+        return nextState(previousBoardState)
       case 'click':
-        return toggleCellAt(previousState, event.value)
+        return toggleCellAt(previousBoardState, event.value)
     }
   }, randomizeState())
   .subscribe(render)
