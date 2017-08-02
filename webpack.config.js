@@ -4,7 +4,7 @@ const path = require('path')
 module.exports = {
   devtool: 'source-map',
   entry: {
-    app: './src/index.js',
+    app: './src/main.js',
   },
 
   output: {
