@@ -13,7 +13,7 @@ import {
 import { curry, over, spread } from 'lodash'
 import Rx from 'rxjs'
 import setupRenderer from './setup'
-import drag from './drag'
+import dragStream from './drag'
 
 const rows = 64
 const cols = 64
@@ -58,19 +58,17 @@ const getCellValue = curry((previousState, r, c) => nextCellValue(...cellState(p
 
 const updateState = getVal => times(r => times(getVal(r), cols), rows)
 
-const randomize = () => updateState(r => c => !!random(0, 1))
+const randomizeState = () => updateState(r => c => !!random(0, 1))
 
 const firstArg = rearg(0)
 
 const nextState =
   firstArg(compose(updateState, getCellValue))
 
-const dragStream = drag()
+const eventCoordinatesReached = (r, c, event) => r === event.r && c === event.c
 
-const cellForClick = (r, c, event) => r === event.r && c === event.c
-
-const clickOn = (state, event) =>
-  updateState(r => c => cellForClick(r, c, event) ^ state[r][c])
+const toggleCellAt = (state, event) =>
+  updateState(r => c => eventCoordinatesReached(r, c, event) ^ state[r][c])
 
 const ticker = Rx.Observable
   .interval(30)
@@ -78,14 +76,14 @@ const ticker = Rx.Observable
 
 const render = setupRenderer(document.getElementById('game'), rows, cols)
 
-dragStream
+dragStream()
   .merge(ticker)
   .scan((previousState, event) => {
     switch (event.type) {
       case 'tick':
         return nextState(previousState)
       case 'click':
-        return clickOn(previousState, event.value)
+        return toggleCellAt(previousState, event.value)
     }
-  }, randomize())
+  }, randomizeState())
   .subscribe(render)
