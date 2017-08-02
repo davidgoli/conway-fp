@@ -1,7 +1,9 @@
-import each from 'lodash/fp/each'
-import flatten from 'lodash/fp/flatten'
-import compose from 'lodash/fp/compose'
-import curry from 'lodash/fp/curry'
+import {
+  compose,
+  curry,
+  each,
+  flatten,
+} from 'lodash/fp'
 
 const cell = (board, r, c) => board.children[0].children[r].children[c]
 const toggleCell = (cell, v) => cell.className = v ? 'on' : ''

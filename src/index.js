@@ -23,7 +23,8 @@ const cols = 64
  * Each "frame" state of Conway is calculated
  * as a function of the previous state.
  *
- * For each cell, its next state depends on:
+ * Each cell exists in a binary state (living or dead).
+ * Each cell has 8 neighbors. Its next state depends on:
  *  1. the number of living neighbors
  *  2. whether it was previously living
  *

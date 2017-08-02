@@ -1,5 +1,5 @@
 import Rx from 'rxjs'
-import { each, indexOf, isEqual } from 'lodash'
+import { indexOf, isEqual } from 'lodash'
 
 const findCoords = el => {
   const parentRow = el.parentNode
@@ -11,11 +11,13 @@ const findCoords = el => {
 
 const isTd = target => target.tagName.toLowerCase() === 'td'
 
+const rxEvent = type => Rx.Observable.fromEvent(document, type)
+
 export default () => {
-  const mousedown = Rx.Observable.fromEvent(document, 'mousedown')
-  const mousemove = Rx.Observable.fromEvent(document, 'mousemove')
-  const mouseup = Rx.Observable.fromEvent(document, 'mouseup')
-  const click = Rx.Observable.fromEvent(document, 'click').pluck('target')
+  const mousedown = rxEvent('mousedown')
+  const mousemove = rxEvent('mousemove')
+  const mouseup = rxEvent('mouseup')
+  const click = rxEvent('click').pluck('target')
 
   const drag = mousedown.flatMap(() =>
     mousemove.takeUntil(mouseup)
