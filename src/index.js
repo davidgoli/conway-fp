@@ -35,22 +35,36 @@ const cols = 64
  ***************************
  */
 
+// In terms of module structure I'd prefer to see the code related to
+// manipulating board state in one place and not here in the index.
 const wrappedIndex = (length, idx) => idx < 0 ? length + idx : (idx >= length ? idx - length : idx)
 const wrappedGet = (a, idx) => a[wrappedIndex(a.length, idx)]
 
+// Nit: It wasn't immediately obvious to me what r and c represent. x and y are
+// more common, otherwise I'd spell out row and col. Oh, and I still don't know
+// what a is. Array? It's a board in some functions and an array in others.
 export const get = (a, r, c) => wrappedGet(wrappedGet(a, r), c)
 
+// Nice. One thing that prettier would probably butcher :)
 const neighborTotal = (a, r, c) =>
   get(a, r-1, c-1) + get(a, r, c-1) + get(a, r+1, c-1) +
     get(a, r-1, c) + /* skip 0,0 */ get(a, r+1, c) +
     get(a, r-1, c+1) + get(a, r, c+1) + get(a, r+1, c+1)
 
+// I've mentioned it elsewhere, but without typedefs it's hard to know what this
+// is. I think that naming these as boolean functions may make it easier to
+// understand at first: willLiveNext or something along those lines. That
+// doesn't quite capture it since it's about mapping a neighbor count...
 const livingCellNextValue = inRange(2, 4)
 const deadCellNextValue = eq(3)
 
 export const previousCellState = over([ get, neighborTotal ])
+// This would be a good place for pattern matching... if only!
 export const nextCellState = ([ wasAlive, totalNeighbors ]) =>
   (wasAlive ? livingCellNextValue : deadCellNextValue)(totalNeighbors)
+// I think that in general many of these function names are suffering from a
+// lack of verb. Maybe that's more normal in point-free style, but it's
+// unsettling to me especially when they're so often used as values.
 export const getNextCellState = compose(
   nextCellState,
   previousCellState
@@ -61,11 +75,14 @@ const updateState = updateGrid(cols, rows)
 
 const randomizeState = () => updateState(r => c => !!random(0, 1))
 
+// Why use get.length here? tbh I don't even know if that's 2 or 3.
 const nextState =
   compose(updateState, curry(getNextCellState, get.length))
 
 const eventCoordinatesReached = (r, c, event) => r === event.r && c === event.c
 
+// Clever use of ^, maybe too clever? also, I believe it returns 0 or 1, so if
+// you want to maintain bools, you'll need !!.
 const toggleCellAt = (state, event) =>
   updateState(r => c => eventCoordinatesReached(r, c, event) ^ state[r][c])
 
