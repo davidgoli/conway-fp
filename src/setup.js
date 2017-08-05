@@ -26,4 +26,4 @@ const table = (height, width) => tbody(
   ), height)
 )
 
-export default (parent, height, width) => render(appendChild(parent, table(height, width)), width)
+export default (parent, height, width) => render(appendChild(parent, table(height, width)))
