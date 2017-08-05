@@ -4,9 +4,9 @@ import { indexOf, isEqual } from 'lodash'
 const findCoords = el => {
   const parentRow = el.parentNode
   const parentBody = el.parentNode.parentNode
-  const r = indexOf(parentRow.children, el)
-  const c = indexOf(parentBody.children, parentRow)
-  return { r, c }
+  const y = indexOf(parentRow.children, el)
+  const x = indexOf(parentBody.children, parentRow)
+  return { y, x }
 }
 
 const isTd = target => target.tagName.toLowerCase() === 'td'

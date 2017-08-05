@@ -20,10 +20,10 @@ const tbody = createElements('tbody')
 const tr = createElements('tr')
 const td = createElements('td')
 
-const table = (rows, cols) => tbody(
+const table = (height, width) => tbody(
   times(() => tr(
-    times(() => td([]), cols)
-  ), rows)
+    times(() => td([]), width)
+  ), height)
 )
 
-export default (parent, rows, cols) => render(appendChild(parent, table(rows, cols)), cols)
+export default (parent, height, width) => render(appendChild(parent, table(height, width)), width)

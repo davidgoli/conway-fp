@@ -10,8 +10,8 @@ import Rx from 'rxjs'
 import setupRenderer from './setup'
 import dragStream from './drag'
 
-const rows = 64
-const cols = 64
+const height = 64
+const width = 64
 
 /**************************
  *
@@ -36,14 +36,14 @@ const cols = 64
  */
 
 const wrappedIndex = (length, idx) => idx < 0 ? length + idx : (idx >= length ? idx - length : idx)
-const wrappedGet = (a, idx) => a[wrappedIndex(a.length, idx)]
+const wrappedGet = (array, idx) => array[wrappedIndex(array.length, idx)]
 
-export const get = (a, r, c) => wrappedGet(wrappedGet(a, r), c)
+export const get = (state, y, x) => wrappedGet(wrappedGet(state, y), x)
 
-const neighborTotal = (a, r, c) =>
-  get(a, r-1, c-1) + get(a, r, c-1) + get(a, r+1, c-1) +
-    get(a, r-1, c) + /* skip 0,0 */ get(a, r+1, c) +
-    get(a, r-1, c+1) + get(a, r, c+1) + get(a, r+1, c+1)
+const neighborTotal = (a, y, x) =>
+  get(a, y-1, x-1) + get(a, y, x-1) + get(a, y+1, x-1) +
+    get(a, y-1, x) + /* skip 0,0 */ get(a, y+1, x) +
+    get(a, y-1, x+1) + get(a, y, x+1) + get(a, y+1, x+1)
 
 const livingCellNextValue = inRange(2, 4)
 const deadCellNextValue = eq(3)
@@ -56,25 +56,25 @@ export const getNextCellState = compose(
   previousCellState
 )
 
-export const updateGrid = (cols, rows) => getVal => times(r => times(getVal(r), cols), rows)
-const updateState = updateGrid(cols, rows)
+export const updateGrid = (width, height) => getVal => times(y => times(getVal(y), width), height)
+const updateState = updateGrid(width, height)
 
-const randomizeState = () => updateState(r => c => !!random(0, 1))
+const randomizeState = () => updateState(y => x => !!random(0, 1))
 
 const nextState =
   compose(updateState, curry(getNextCellState, get.length))
 
-const eventCoordinatesReached = (r, c, event) => r === event.r && c === event.c
+const eventCoordinatesReached = (y, x, event) => y === event.y && x === event.x
 
 const toggleCellAt = (state, event) =>
-  updateState(r => c => eventCoordinatesReached(r, c, event) ^ state[r][c])
+  updateState(y => x => eventCoordinatesReached(y, x, event) ^ state[y][x])
 
 export default () => {
   const ticker = Rx.Observable
     .interval(30)
     .mapTo({ type: 'tick' })
 
-  const render = setupRenderer(document.getElementById('game'), rows, cols)
+  const render = setupRenderer(document.getElementById('game'), height, width)
 
   return dragStream()
     .merge(ticker)
