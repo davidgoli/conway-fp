@@ -1,12 +1,21 @@
-import { get, previousCellState, getNextCellState, nextCellState } from '../src/index'
+import {
+  get,
+  previousCellState,
+  getNextCellState,
+  nextCellState
+} from '../src/game'
 
 test('get', () => {
-  expect(get([['a', 'b'], ['c', 'd']], 0, 0)).toEqual('a')
-  expect(get([['a', 'b'], ['c', 'd']], 0, 1)).toEqual('b')
-  expect(get([['a', 'b'], ['c', 'd']], 1, 0)).toEqual('c')
-  expect(get([['a', 'b'], ['c', 'd']], 1, 1)).toEqual('d')
-  expect(get([['a', 'b'], ['c', 'd']], -1, -1)).toEqual('d')
-  expect(get([['a', 'b'], ['c', 'd']], 0, -1)).toEqual('b')
+  const grid = [
+    ['a', 'b'],
+    ['c', 'd']
+  ];
+  expect(get(grid, 0, 0)).toEqual('a')
+  expect(get(grid, 0, 1)).toEqual('b')
+  expect(get(grid, 1, 0)).toEqual('c')
+  expect(get(grid, 1, 1)).toEqual('d')
+  expect(get(grid, -1, -1)).toEqual('d')
+  expect(get(grid, 0, -1)).toEqual('b')
 })
 
 test('previousCellState', () => {
@@ -19,13 +28,13 @@ test('previousCellState', () => {
 })
 
 test('nextCellState', () => {
-  expect(nextCellState([ true, 2 ])).toEqual(true)
-  expect(nextCellState([ true, 3 ])).toEqual(true)
-  expect(nextCellState([ false, 3 ])).toEqual(true)
-  expect(nextCellState([ false, 2 ])).toEqual(false)
-  expect(nextCellState([ false, 4 ])).toEqual(false)
-  expect(nextCellState([ true, 4 ])).toEqual(false)
-  expect(nextCellState([ true, 1 ])).toEqual(false)
+  expect(nextCellState([true, 2])).toEqual(true)
+  expect(nextCellState([true, 3])).toEqual(true)
+  expect(nextCellState([false, 3])).toEqual(true)
+  expect(nextCellState([false, 2])).toEqual(false)
+  expect(nextCellState([false, 4])).toEqual(false)
+  expect(nextCellState([true, 4])).toEqual(false)
+  expect(nextCellState([true, 1])).toEqual(false)
 })
 
 test('getNextCellState', () => {
@@ -43,4 +52,3 @@ test('getNextCellState', () => {
   ]
   expect(getNextCellState(prevState2, 1, 1)).toEqual(true)
 })
-
